@@ -103,9 +103,9 @@ export function handleFirestoreError(
   throw errToThrow;
 }
 
-// HARDCODED FIREBASE CONFIG
+// FIREBASE CONFIG (apiKey fixed: "...DPlKq8..." with lowercase l)
 const firebaseConfig = {
-  apiKey: "AIzaSyDPLKq8eC19pixCyZhgJO4efeJZsSZ2MQk",
+  apiKey: "AIzaSyDPlKq8eC19pixCyZhgJO4efeJZsSZ2MQk",
   authDomain: "cghs-alumni.firebaseapp.com",
   projectId: "cghs-alumni",
   storageBucket: "cghs-alumni.firebasestorage.app",
