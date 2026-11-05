@@ -103,18 +103,16 @@ export function handleFirestoreError(
   throw errToThrow;
 }
 
-function getFirebaseConfig() {
-  return {
-    apiKey: 'AIzaSyDPLKq8eC19pixCyZhgJO4efeJZsSZ2MQk',
-    authDomain: 'cghs-alumni.firebaseapp.com',
-    projectId: 'cghs-alumni',
-    storageBucket: 'cghs-alumni.firebasestorage.app',
-    messagingSenderId: '1034787810470',
-    appId: '1:1034787810470:web:06582ca9788f3d53fc9867',
-  };
-}
+// HARDCODED FIREBASE CONFIG
+const firebaseConfig = {
+  apiKey: "AIzaSyDPLKq8eC19pixCyZhgJO4efeJZsSZ2MQk",
+  authDomain: "cghs-alumni.firebaseapp.com",
+  projectId: "cghs-alumni",
+  storageBucket: "cghs-alumni.firebasestorage.app",
+  messagingSenderId: "1034787810470",
+  appId: "1:1034787810470:web:06582ca9788f3d53fc9867"
+};
 
-const firebaseConfig = getFirebaseConfig();
 const app: FirebaseApp = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
 
 export const auth: Auth = getAuth(app);
@@ -122,24 +120,19 @@ export const db: Firestore = getFirestore(app);
 export const googleProvider = new GoogleAuthProvider();
 googleProvider.setCustomParameters({ prompt: 'select_account' });
 
-// Pure Firebase Auth state subscription (real Firebase user or null)
 export function subscribeToAuth(callback: (user: User | null) => void): () => void {
   return onAuthStateChanged(auth, callback);
 }
 
-// Pure Firebase Google Sign-In: Always returns the real Firebase User with real uid
-// Throws real error if sign-in fails
 export async function loginWithGoogle(): Promise<User> {
   const result = await signInWithPopup(auth, googleProvider);
   return result.user;
 }
 
-// Pure Firebase Sign Out
 export async function logoutUser(): Promise<void> {
   await signOut(auth);
 }
 
-// Pure Firestore fetch at users/{uid}
 export async function fetchProfile(uid: string): Promise<UserProfile | null> {
   const docPath = `users/${uid}`;
   try {
@@ -155,8 +148,6 @@ export async function fetchProfile(uid: string): Promise<UserProfile | null> {
   }
 }
 
-// Pure Firestore save at users/{uid} with ONLY: uid, name, nameLower, batch, currentCity, jobOrStudy, status, updatedAt
-// When a profile already exists in Firestore, keeps the existing status value exactly as it is (only "pending" for very first creation)
 export async function saveProfile(profile: {
   uid: string;
   name: string;
@@ -170,7 +161,6 @@ export async function saveProfile(profile: {
 
   let finalStatus: 'pending' | 'approved' | 'rejected' = profile.status || 'pending';
 
-  // If no status was passed in, check if document already exists in Firestore
   if (!profile.status) {
     try {
       const existingSnap = await getDoc(docRef);
@@ -206,7 +196,6 @@ export async function saveProfile(profile: {
   }
 }
 
-// Check if a document exists at admins/{uid} using simple get
 export async function checkIsAdmin(uid: string): Promise<boolean> {
   const docPath = `admins/${uid}`;
   try {
@@ -219,7 +208,6 @@ export async function checkIsAdmin(uid: string): Promise<boolean> {
   }
 }
 
-// Fetch users from "users" collection where status == "pending", at most 20 at a time
 export async function fetchPendingUsers(): Promise<UserProfile[]> {
   const docPath = 'users';
   try {
@@ -249,7 +237,6 @@ export async function fetchPendingUsers(): Promise<UserProfile[]> {
   }
 }
 
-// Sets ONLY the field status = "approved" or status = "rejected" on users/{thatUserId}
 export async function updateUserStatus(userId: string, newStatus: 'approved' | 'rejected'): Promise<void> {
   const docPath = `users/${userId}`;
   try {
@@ -269,12 +256,6 @@ export interface DirectoryFetchResult {
   hasMore: boolean;
 }
 
-// Fetch approved alumni:
-// - always where("status", "==", "approved")
-// - if a batch is selected, also where("batch", "==", selectedBatch)
-// - always limit(20)
-// - do NOT use orderBy (so no extra composite index is needed)
-// - startAfter(lastDocument) when loading more
 export async function fetchApprovedAlumni(
   selectedBatch?: string,
   lastVisibleDoc?: QueryDocumentSnapshot<DocumentData> | null
@@ -334,8 +315,6 @@ export interface ContactDoc {
   updatedAt: string;
 }
 
-// Read contact documents with getDoc using exact paths users/{uid}/contact/phone and users/{uid}/contact/email
-// Never uses a collection query or list for contact
 export async function fetchContactInfo(uid: string): Promise<{
   phone: ContactDoc | null;
   email: ContactDoc | null;
@@ -367,11 +346,6 @@ export async function fetchContactInfo(uid: string): Promise<{
   return { phone, email };
 }
 
-// Save contact documents:
-// - If phone not empty: write users/{uid}/contact/phone with EXACTLY value, visibility, updatedAt
-// - If phone empty: deleteDoc users/{uid}/contact/phone
-// - If email not empty: write users/{uid}/contact/email with EXACTLY value, visibility, updatedAt
-// - If email empty: deleteDoc users/{uid}/contact/email
 export async function saveContactInfo(
   uid: string,
   phoneVal: string,
@@ -430,7 +404,6 @@ export interface UserPhotoDoc {
   updatedAt: string;
 }
 
-// Resize image on-device to max 200x200 pixels and convert to base64 string
 export function resizeImageToBase64(file: File, maxDim = 200): Promise<string> {
   return new Promise((resolve, reject) => {
     if (!file.type.startsWith('image/')) {
@@ -475,8 +448,6 @@ export function resizeImageToBase64(file: File, maxDim = 200): Promise<string> {
   });
 }
 
-// Save photo to Firestore in collection "photos" with document ID equal to user's UID
-// Document fields: uid, base64, updatedAt
 export async function saveUserPhoto(uid: string, base64: string): Promise<void> {
   const docRef = doc(db, 'photos', uid);
   const payload: UserPhotoDoc = {
@@ -492,7 +463,6 @@ export async function saveUserPhoto(uid: string, base64: string): Promise<void> 
   }
 }
 
-// Read user's photo from Firestore at photos/{uid}
 export async function fetchUserPhoto(uid: string): Promise<string | null> {
   try {
     const docRef = doc(db, 'photos', uid);
@@ -506,5 +476,3 @@ export async function fetchUserPhoto(uid: string): Promise<string | null> {
     return null;
   }
 }
-
-
