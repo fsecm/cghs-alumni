@@ -1,0 +1,54 @@
+{
+  "entities": {
+    "User": {
+      "title": "User Profile",
+      "description": "Alumni profile document for CGHS Alumni Directory",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "description": "Firebase Auth user ID"
+        },
+        "name": {
+          "type": "string",
+          "description": "Full name of the alumnus",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "batch": {
+          "type": "string",
+          "description": "Graduating SSC batch identifier",
+          "enum": ["17", "19", "21", "22"]
+        },
+        "currentCity": {
+          "type": "string",
+          "description": "Current residing city",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "jobOrStudy": {
+          "type": "string",
+          "description": "Current occupation or field of study",
+          "minLength": 1,
+          "maxLength": 150
+        },
+        "status": {
+          "type": "string",
+          "description": "Review status of the profile entry",
+          "enum": ["pending", "approved", "rejected"]
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Last update timestamp"
+        }
+      },
+      "required": ["uid", "name", "batch", "currentCity", "jobOrStudy", "status"]
+    }
+  },
+  "firestore": {
+    "/users/{uid}": {
+      "schema": "User",
+      "description": "Alumnus profile indexed by Firebase Auth UID"
+    }
+  }
+}

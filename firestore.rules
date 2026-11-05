@@ -1,0 +1,44 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Global default-deny safety net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidUser(data, userId) {
+      return data.uid == userId
+        && data.name is string && data.name.size() >= 1 && data.name.size() <= 100
+        && data.batch is string && data.batch in ['17', '19', '21', '22']
+        && data.currentCity is string && data.currentCity.size() >= 1 && data.currentCity.size() <= 100
+        && data.jobOrStudy is string && data.jobOrStudy.size() >= 1 && data.jobOrStudy.size() <= 150
+        && data.status is string && data.status in ['pending', 'approved', 'rejected'];
+    }
+
+    match /users/{userId} {
+      // A logged-in user can read only their own document users/{uid}
+      allow get: if isOwner(userId);
+      // Blanket listing is forbidden
+      allow list: if false;
+
+      // Only the authenticated owner can write their own document with valid schema
+      allow create: if isOwner(userId)
+        && isValidUser(request.resource.data, userId)
+        && request.resource.data.status == 'pending';
+
+      allow update: if isOwner(userId)
+        && isValidUser(request.resource.data, userId)
+        && request.resource.data.uid == resource.data.uid;
+
+      allow delete: if false;
+    }
+  }
+}

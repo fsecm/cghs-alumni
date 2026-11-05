@@ -1,0 +1,6 @@
+{
+  "name": "CGHS Alumni",
+  "description": "Alumni directory web app for Chandipasha Government High School, Nandail, Mymensingh (Established 1915).",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
