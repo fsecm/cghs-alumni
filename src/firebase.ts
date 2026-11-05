@@ -103,28 +103,14 @@ export function handleFirestoreError(
   throw errToThrow;
 }
 
-function getSavedCustomConfig() {
-  try {
-    const raw = localStorage.getItem('cghs_firebase_custom_config');
-    if (raw) return JSON.parse(raw);
-  } catch (e) {
-    console.error('Failed to parse custom Firebase config', e);
-  }
-  return null;
-}
-
 function getFirebaseConfig() {
-  const custom = getSavedCustomConfig();
-  if (custom && custom.apiKey) return custom;
-
-  const projectId = import.meta.env.VITE_FIREBASE_PROJECT_ID || 'cghs-alumni';
   return {
-    apiKey: import.meta.env.VITE_FIREBASE_API_KEY || '',
-    authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || `${projectId}.firebaseapp.com`,
-    projectId: projectId,
-    storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || `${projectId}.appspot.com`,
-    messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || '',
-    appId: import.meta.env.VITE_FIREBASE_APP_ID || '',
+    apiKey: 'AIzaSyDPLKq8eC19pixCyZhgJO4efeJZsSZ2MQk',
+    authDomain: 'cghs-alumni.firebaseapp.com',
+    projectId: 'cghs-alumni',
+    storageBucket: 'cghs-alumni.firebasestorage.app',
+    messagingSenderId: '1034787810470',
+    appId: '1:1034787810470:web:06582ca9788f3d53fc9867',
   };
 }
 
